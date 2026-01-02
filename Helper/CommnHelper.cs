@@ -8,11 +8,18 @@ namespace CICDPipeLine.Helper
     {
         private string DecryptValue(string value)
         {
-            using (var des = new TripleDESCryptoServiceProvider { Mode=CipherMode.ECB, Key=GetKey("test"),Padding=PaddingMode.PKCS7})
-            using (var desEncrypt = des.CreateDecryptor())
+            using (var aes = new AesCryptoServiceProvider
+            {
+                Mode = CipherMode.CBC,
+                Padding = PaddingMode.PKCS7,
+                Key = GetKey("Test"),
+                IV = GetIV("Test")
+            })
+            using (var decryptor = aes.CreateDecryptor())
             {
                 var buffer = Convert.FromBase64String(value.Replace("", "+"));
-                return Encoding.UTF8.GetString(desEncrypt.TransformFinalBlock(buffer, 0, buffer.Length));
+                var plainBytes = decryptor.TransformFinalBlock(buffer, 0, buffer.Length);
+                return Encoding.UTF8.GetString(plainBytes);
             }
         }
 
